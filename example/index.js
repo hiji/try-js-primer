@@ -31,3 +31,44 @@ console.log(array[0]); // インデックスは0始まり
 // 正規表現
 const numberRegExp = /\d+/
 console.log(numberRegExp.test(123));
+
+// べき乗演算子 => **
+console.log(2 ** 4); // 2の4乗
+console.log(Math.pow(2, 4)); // これと同じ
+
+// Nan "Not a Number"
+console.log(NaN === NaN); // => false
+console.log(typeof NaN); // => number
+console.log(Number.isNaN(NaN)); // => true
+
+// 厳密等価演算子 "==="
+console.log(1 === 1); // => true
+console.log(1 === "1"); // => false
+const objA = {};
+const objB = {};
+const objC = objA;
+console.log(objA === objB); // => false
+console.log(objA === objC); // => true
+
+// 等価演算子
+// 同じデータ型を比較するなら厳密等価演算子と同じ
+console.log(objA === objB); // => false
+console.log(objA === objC); // => true
+// 型が違うと暗黙的な型変換をされてしまう
+console.log(1 == "1"); // => true
+console.log(1 == "01"); // => true
+console.log(0 == false); // => true
+console.log(0 == null); // => false
+console.log(null == undefined); // => true
+// バグが起きやすいので、基本的には厳密等価演算子を使うべき
+
+// 分割代入
+const arrayA = [1, 2];
+const [a, b] = arrayA;
+console.log(a); // => 1
+console.log(b); // => 2
+const objectA = {
+    "key": "value"
+};
+const { key } = object;
+console.log(key); // => "value"
