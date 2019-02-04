@@ -268,4 +268,125 @@ function sumForReduce(numbers) {
 }
 console.log(sumForReduce([1, 2, 3, 4, 5]));
 
+// プロパティ名と変数名が同じなら省略できる
+let name = "名前";
+const nameObject = {
+    name
+};
+console.log(nameObject.name); // => 名前
+name = "名前変更";
+console.log(nameObject.name); // => 名前 （影響ない）
+
+// オブジェクトリテラルとnew演算子は同じ
+// オブジェクトリテラルの方が簡潔なので、newを使う必要は無い
+const newObject = new Object();
+console.log(newObject); // => {}
+
+// プロパティへのアクセス方法は2種類
+const propObject = {
+    key: "value",
+    123: "value2"
+};
+console.log(propObject.key); // => "value" ドット記法で参照
+console.log(propObject["key"]); // => "value" ブラケット記法で参照
+console.log(propObject["123"]); // => "value2" ブラケット記法だと、数字始まりでもアクセスできる
+// ブラケット記法だと変数が使える
+const languages = {
+    ja: "日本語",
+    en: "英語"
+};
+const myLang = "ja";
+console.log(languages[myLang]); // => "日本語"
+
+const keyStr = "key-string";
+const keyObject = {};
+keyObject[keyStr] = "value of key";
+console.log(keyObject[keyStr]); // => "value of key"
+// Symbolは例外的に文字列化されず扱える
+const symbolKey = Symbol("シンボルは一意な値");
+object[symbolKey] = "value of symbol";
+console.log(object[symbolKey]); // => "value of symbol"
+
+//  オブジェクトリテラル内でのブラケット記法を使ったプロパティ。Computed property names。
+const bracketNameObject = {
+    [keyStr]: "value"
+};
+console.log(bracketNameObject[keyStr]); // => "value"
+
+// プロパティを消すのはdelete
+// constでも消せる
+const deleteObject = {
+    key1: "value1",
+    key2: "value2"
+};
+// key1プロパティを削除
+delete deleteObject.key1;
+// key1プロパティが削除されている
+console.log(deleteObject); // => { "key2": "value2" }
+
+// プロパティの存在確認方法はいくつかある
+// undefinedとの比較する方法
+const checkObject = { key: "value" };
+// `key`プロパティが`undefined`ではないなら、プロパティが存在する?
+if (checkObject.key !== undefined) {
+    console.log("`key`プロパティの値は`undefined`");
+}
+// この方法では、キーが無い場合と、値がundefinedだった場合の区別がつかない
+const checkObject2 = { key: undefined };
+// `key`プロパティの値が`undefined`
+if (checkObject2.key !== undefined) {
+    // 実行されない文
+    console.log("実行されない文");
+}
+// in演算子を使う方法
+if ("key" in checkObject) {
+    console.log("`key`プロパティは存在する");
+}
+// in演算子を使う方法
+if (checkObject.hasOwnProperty("key")) {
+    console.log("`key`プロパティは存在する");
+}
+
+// オブジェクトのマージ
+const mergeObjectA = { a: "a" };
+const mergeObjectB = { b: "b" };
+const merged = Object.assign({}, mergeObjectA, mergeObjectB);
+console.log(merged); // => { a: "a", b: "b" }
+// オブジェクトのspread構文でのマージ (ES2018)
+const mergedBySpread = {
+    ...mergeObjectA,
+    ...mergeObjectB
+};
+console.log(mergedBySpread); // => { a: "a", b: "b" }
+
+// オブジェクトの複製
+// `object`を浅く複製したオブジェクトを返す
+const shallowClone = (object) => {
+    return Object.assign({}, object);
+};
+const sourceObject = {
+    level: 1,
+    nest: {
+        level: 2
+    },
+};
+const cloneObject = shallowClone(sourceObject);
+console.log(cloneObject); // => { a: "a" }
+// オブジェクトを複製しているので、異なるオブジェクトとなる
+console.log(sourceObject === cloneObject); // => false
+// shallow copyなので深いプロパティは同じ
+console.log(cloneObject.nest === sourceObject.nest); // => true
+// Deep Copy を実装してみる
+// `object`を深く複製したオブジェクトを返す
+function deepClone(object) {
+    const newObject = shallowClone(object);
+    // プロパティがオブジェクト型であるなら、再帰的に複製する
+    Object.keys(newObject)
+        .filter(k => typeof newObject[k] === "object")
+        .forEach(k => newObject[k] = deepClone(newObject[k]));
+    return newObject;
+}
+const deepCloneObject = deepClone(sourceObject);
+// `nest`オブジェクトも再帰的に複製されている
+console.log(deepCloneObject.nest === sourceObject.nest); // => false
 
