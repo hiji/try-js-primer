@@ -4,7 +4,7 @@ console.log(1); // => 1
 console.log(typeof true); // => boolean
 
 // テンプレートリテラルだと変数展開できる
-const string  = "文字列"
+const string = "文字列";
 console.log(`これは${string}です`);
 
 // 複数行も書ける
@@ -18,7 +18,7 @@ const object = {
     "key": "value",
     "123": "value"
 };
-console.log(object.key)
+console.log(object.key);
 console.log(object["key"]);
 // console.log(object.123); 数字始まりは識別子名ではNGなので、この記法では書けない
 console.log(object["123"]);
@@ -29,7 +29,7 @@ const array = [1, 2, 3];
 console.log(array[0]); // インデックスは0始まり
 
 // 正規表現
-const numberRegExp = /\d+/
+const numberRegExp = /\d+/;
 console.log(numberRegExp.test(123));
 
 // べき乗演算子 => **
@@ -72,3 +72,14 @@ const objectA = {
 };
 const { key } = object;
 console.log(key); // => "value"
+
+// 明示的な型変換
+Boolean(1); // => true
+String(1); // => "1"
+Number("1"); // => 1
+Number.parseInt("1");
+Number.parseFloat("1");
+Number("文字列"); // => NaN
+Number(undefined); // => NaN
+Number({}); // => NaN
+
