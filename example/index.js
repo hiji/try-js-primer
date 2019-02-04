@@ -390,3 +390,15 @@ const deepCloneObject = deepClone(sourceObject);
 // `nest`オブジェクトも再帰的に複製されている
 console.log(deepCloneObject.nest === sourceObject.nest); // => false
 
+// in演算子とObject#hasOwnPropertyメソッドの違い
+const testObject = {};
+// `object`のインスタンス自体に`toString`メソッドが定義されているわけではない
+console.log(testObject.hasOwnProperty("toString")); // => false
+// `in`演算子は指定されたプロパティ名が見つかるまで親を辿るため、`Object.prototype`まで見に行く
+console.log("toString" in testObject); // => true
+
+// プロトタイプの継承。継承元を明示。
+// const object = {} と同じ
+const extObject = Object.create(Object.prototype);
+// `object`は`Object.prototype`を継承している
+console.log(extObject.hasOwnProperty === Object.prototype.hasOwnProperty); // => true
