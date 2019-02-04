@@ -228,5 +228,44 @@ const objWithMethod2015 = {
     method() {
         return "this is method";
     }
-}
+};
 console.log(objWithMethod2015.method()); // => "this is method"
+
+// 配列の関数
+function isEven(number) {
+    return number % 2 === 0;
+}
+const testNumber = [1, 5, 10, 15, 20];
+console.log(testNumber.some(isEven)); // => true
+console.log(testNumber.filter(isEven)); // => [10, 20]
+
+// for in
+const forObj = {
+    "a": 1,
+    "b": 2,
+    "c": 3
+};
+for (const key in forObj) {
+    const value = forObj[key];
+    console.log(`key:${key}, value:${value}`);
+}
+Object.keys(forObj).forEach(key => {
+    const value = forObj[key];
+    console.log(`key:${key}, value:${value}`);
+});
+// forで更新する変数はletにしないといけない
+const forNums = [5, 10];
+let total = 0;
+for (const num in forNums) {
+    total += num;
+}
+console.log(total); // => "001"
+// letじゃなくconstにするため、reduceで実装
+function sumForReduce(numbers) {
+    return numbers.reduce((total, num) => {
+        return total + num;
+    }, 0); // 初期値が0;
+}
+console.log(sumForReduce([1, 2, 3, 4, 5]));
+
+
