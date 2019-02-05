@@ -913,3 +913,314 @@ try {
     console.log("この文は実行されます");
 }
 
+// 非同期処理
+function blockTime(timeout) {
+    const startTime = Date.now();
+    while (true) {
+        const diffTime = Date.now() - startTime;
+        if (diffTime >= timeout) {
+            return; // 指定時間経過したら関数の実行を終了
+        }
+    }
+}
+console.log("1. setTimeoutのコールバック関数を10ミリ秒後に実行します");
+setTimeout(() => {
+    console.log("3. ブロックする処理を開始します");
+    blockTime(1000); // 他の処理を1秒間ブロックする
+    console.log("4. ブロックする処理が完了しました");
+}, 10);
+// ブロックする処理は非同期なタイミングで呼び出されるので、次の行が先に実行される
+console.log("2. 同期的な処理を実行します");
+
+const startTime = Date.now();
+// 10ミリ秒後にコールバック関数を呼び出すようにタイマーに登録する
+setTimeout(() => {
+    const endTime = Date.now();
+    console.log(`非同期処理のコールバックが呼ばれるまで${endTime - startTime}ミリ秒かかりました`);
+}, 10);
+console.log("ブロックする処理を開始します");
+blockTime(1000); // 1秒間処理をブロックする
+console.log("ブロックする処理が完了しました");
+
+try {
+    setTimeout(() => {
+        throw new Error("非同期的なエラー");
+    }, 10);
+} catch (error) {
+    // この文は実行されません
+}
+console.log("この文は実行されます");
+
+// 非同期での例外処理
+
+/**
+ * 1000ミリ秒未満のランダムなタイミングでレスポンスを擬似的にデータ取得する関数
+ * 指定した`path`にデータがある場合は`callback(null, レスポンス)`を呼ぶ
+ * 指定した`path`にデータがない場合は`callback(エラー)`を呼ぶ
+ */
+function dummyFetch(path, callback) {
+    setTimeout(() => {
+        // /success から始まるパスにはリソースがあるという設定
+        if (path.startsWith("/success")) {
+            callback(null, { body: `Response body of ${path}` });
+        } else {
+            callback(new Error("NOT FOUND"));
+        }
+    }, 1000 * Math.random());
+}
+// /success/data にリソースが存在するので、`response`にはデータが入る
+dummyFetch("/success/data", (error, response) => {
+    if (error) {
+        // この文は実行されません
+    } else {
+        console.log(response); // => { body: "Response body of /success/data" }
+    }
+});
+// /failure/data にリソースは存在しないので、`error`にはエラーオブジェクトが入る
+dummyFetch("/failure/data", (error, response) => {
+    if (error) {
+        console.log(error.message); // => "NOT FOUND"
+    } else {
+        // この文は実行されません
+    }
+});
+
+// 非同期処理（Promise）
+/**
+ * 1000ミリ秒未満のランダムなタイミングでレスポンスを擬似的にデータ取得する関数
+ * 指定した`path`にデータがある場合は成功として`resolve`を呼ぶ
+ * 指定した`path`にデータがない場合は失敗として`reject`を呼ぶ
+ */
+function dummyFetchByPromise(path) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (path.startsWith("/success")) {
+                resolve({ body: `Response body of ${path}` });
+            } else {
+                reject(new Error("NOT FOUND"));
+            }
+        }, 1000 * Math.random());
+    });
+}
+// `then`メソッドで成功時と失敗時に呼ばれるコールバック関数を登録
+// /success/data のリソースは存在するので成功しonFulfilledが呼ばれる
+dummyFetchByPromise("/success/data").then(function onFulfilled(response) {
+    console.log(response); // => { body: "Response body of /success/data" }
+}, function onRejected(error) {
+    // この文は実行されません
+});
+// /failure/data のリソースは存在しないのでonRejectedが呼ばれる
+dummyFetchByPromise("/failure/data").then(function onFulfilled(response) {
+    // この文は実行されません
+}, function onRejected(error) {
+    console.log(error); // Error: "NOT FOUND"
+});
+
+function delay(timeoutMs) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, timeoutMs);
+    });
+}
+// `then`メソッドで成功時のコールバック関数だけを登録
+delay(10).then(() => {
+    console.log("10ミリ秒後に呼ばれる");
+});
+
+function throwPromise() {
+    return new Promise((resolve, reject) => {
+        // Promiseコンストラクタの中で例外は自動的にキャッチされrejectを呼ぶ
+        throw new Error("xxx 例外が発生");
+        // 例外が発生するとそれ以降の処理は実行されない
+        // この文は実行されません
+    });
+}
+
+throwPromise().catch(error => {
+    console.log(error.message); // => "例外が発生"
+});
+
+const promise = new Promise((resolve) => {
+    console.log("1. resolveします");
+    resolve();
+});
+promise.then(() => {
+    console.log("3. コールバック関数が実行されました");
+});
+console.log("2. 同期的な処理が実行されました");
+
+// Promiseインスタンスでメソッドチェーン
+Promise.resolve()
+// thenメソッドは新しい`Promise`インスタンスを返す
+    .then(() => {
+        console.log(1);
+    })
+    .then(() => {
+        console.log(2);
+    });
+
+Promise.resolve(1).then((value) => {
+    console.log(value); // => 1
+    return value * 2;
+}).then(value => {
+    console.log(value); // => 2
+    return value * 2;
+}).then(value => {
+    console.log(value); // => 4
+    // 値を返さない場合は undefined を返すのと同じ
+}).then(value => {
+    console.log(value); // => undefined
+});
+
+Promise.resolve().then(function onFulfilledA() {
+    return Promise.reject(new Error("失敗"));
+}).then(function onFulfilledB() {
+    console.log("onFulfilledBは呼び出されません");
+}).catch(function onRejected(error) {
+    console.log(error.message); // => "失敗"
+}).then(function onFulfilledC() {
+    console.log("onFulfilledCは呼び出されます");
+});
+
+function asyncFunction() {
+    return Promise.reject(new Error("エラー"));
+}
+function main() {
+    return asyncFunction().catch(error => {
+        // asyncFunctionで発生したエラーのログを出力する
+        console.log(error);
+        // Promiseチェーンはそのままエラーを継続させる
+        return Promise.reject(error);
+    });
+}
+// mainはRejectedなPromiseを返す
+main().then(() => {
+    console.log("この行は呼び出されません");
+}).catch(error => {
+    console.log("メインの処理が失敗した");
+});
+
+function dummyFetch2(path) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (path.startsWith("/resource")) {
+                resolve({ body: `Response body of ${path}` });
+            } else {
+                reject(new Error("NOT FOUND"));
+            }
+        }, 1000 * Math.random());
+    });
+}
+// リソースを取得中かどうかのフラグ
+let isLoading = true;
+dummyFetch2("/resource/A").then(response => {
+    console.log(response);
+}).catch(error => {
+    console.log(error);
+}).finally(() => {
+    isLoading = false;
+    console.log("Promise#finally");
+});
+
+// Promiseで直列処理
+function dummyFetch3(path) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (path.startsWith("/resource")) {
+                resolve({ body: `Response body of ${path}` });
+            } else {
+                reject(new Error("NOT FOUND"));
+            }
+        }, 1000 * Math.random());
+    });
+}
+
+const promiseResults = [];
+// Resource Aを取得する
+dummyFetch3("/resource/A").then(response => {
+    promiseResults.push(response.body);
+    // Resource Bを取得する
+    return dummyFetch3("/resource/B");
+}).then(response => {
+    promiseResults.push(response.body);
+}).then(() => {
+    console.log(promiseResults); // => ["Response body of /resource/A", "Response body of /resource/B"]
+});
+
+// Promise all
+const promise1 = delay(1);
+const promise2 = delay(2);
+const promise3 = delay(3);
+
+Promise.all([promise1, promise2, promise3]).then(function(values) {
+    console.log(values); // => [1, 2, 3]
+});
+
+
+const fetchedPromise = Promise.all([
+    dummyFetch3("/resource/A"),
+    dummyFetch3("/resource/B")
+]);
+fetchedPromise.then(([responseA, responseB]) => {
+    console.log(responseA.body); // => "Response body of /resource/A"
+    console.log(responseB.body); // => "Response body of /resource/B"
+});
+
+// Async（2017）
+async function doAsync() {
+    return "値";
+}
+// doAsync関数はPromiseを返す
+doAsync().then(value => {
+    console.log(value); // => "値"
+});
+
+async function asyncMain() {
+    const value = await Promise.resolve(42);
+    console.log(value); // => 42
+}
+asyncMain(); // Promiseインスタンスを返す
+
+
+class AsyncStorage {
+    constructor() {
+        this.dataMap = new Map();
+    }
+    async save(key, value) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                this.dataMap.set(key, value);
+                resolve();
+            }, 100);
+        });
+    }
+    async load(key) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve(this.dataMap.get(key));
+            }, 50);
+        });
+    }
+}
+// Async Storageを作成する
+const storage = new AsyncStorage();
+// 1. AsyncStorageにデータを保存する
+async function saveUsers(users) {
+    users.forEach(async(user) => {
+        await storage.save(user.id, user);
+    });
+}
+// 2. AsyncStorageからデータを読み取る
+async function loadUser(userId) {
+    return storage.load(userId);
+}
+async function asyncMain2() {
+    const users = [{ id: 1, name: "John" }, { id: 5, name: "Smith" }, { id: 7, name: "Ayo" }];
+    await saveUsers(users);
+    // idが5のユーザーデータを取り出す
+    const user = await loadUser(5);
+    // しかしまだ保存が完了していないためundeinedとなる
+    console.log(user); // => undefined
+}
+asyncMain2();
