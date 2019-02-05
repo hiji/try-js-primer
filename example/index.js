@@ -768,3 +768,133 @@ function outer() {
 const innerArrowFunction = outer();
 console.log(innerArrowFunction()); // => window or undefined
 
+// クラスの定義
+class MyClass {
+    constructor() {
+        // コンストラクタ関数の処理
+    }
+}
+
+const MyCaseClass = class MyClass {
+    constructor() {}
+};
+
+const AnnonymousClass = class {
+    constructor() {}
+};
+
+class Counter {
+    constructor() {
+        this.count = 0;
+    }
+    // `increment`メソッドをクラスに定義する
+    increment() {
+        // `this`は`Counter`のインスタンスを参照する
+        this.count++;
+    }
+}
+const counterA = new Counter();
+const counterB = new Counter();
+// `counterA.increment()`のベースオブジェクトは`counterA`インスタンス
+counterA.increment();
+// 各インスタンスのもつプロパティ(状態)は異なる
+console.log(counterA.count); // => 1
+console.log(counterB.count); // => 0
+// 各インスタンスオブジェクトのメソッドは共有されている(同じ関数を参照している)
+console.log(counterA.increment === counterB.increment); // => true
+
+class NumberValue {
+    constructor(value) {
+        this._value = value;
+    }
+    // `_value`プロパティの値を返すgetter
+    get value() {
+        console.log("getter");
+        return this._value;
+    }
+    // `_value`プロパティに値を代入するsetter
+    set value(newValue) {
+        console.log("setter");
+        this._value = newValue;
+    }
+}
+
+const number = new NumberValue(1);
+// "getter"とコンソールに表示される
+console.log(number.value); // => 1
+// "setter"とコンソールに表示される
+number.value = 42;
+// "getter"とコンソールに表示される
+console.log(number.value); // => 42
+
+// プロトタイプメソッド
+class PrototypeClass {
+    constructor() {
+        this.method2 = () => {
+            console.log("インスタンスのメソッド");
+        };
+    }
+    method() {
+        console.log("プロトタイプのメソッド");
+    }
+    method2() {
+        console.log("プロトタイプのメソッド")
+    }
+
+}
+console.log(typeof PrototypeClass.prototype.method === "function"); // => true
+console.log(PrototypeClass.prototype.constructor === PrototypeClass); // => true
+
+// インスタンスのメソッドがあればそれを優先
+const protoTypeInstance = new PrototypeClass();
+protoTypeInstance.method2(); // => "インスタンスのメソッド"
+
+// instanceの`[[Prototype]]`内部プロパティは`PrototypeClass.prototype`と一致する
+const Prototype = Object.getPrototypeOf(protoTypeInstance);
+console.log(Prototype === PrototypeClass.prototype); // => true
+
+// 継承
+// 親クラス
+class Parent {
+    constructor(...args) {
+        console.log("Parentコンストラクタの処理", ...args);
+        this.name = "Parent";
+        this.method2 = () => {
+            console.log("Parent#method2");
+        };
+    }
+    method() {
+        console.log("Parent#method");
+    }
+    static hello() {
+        return "Hello";
+    }
+}
+// Parentを継承したChildクラスの定義
+class Child extends Parent {
+    constructor(...args) {
+        // Parentのコンストラクタ処理を呼びだす
+        // 子クラスでは`super()`を`this`に触る前に呼び出さなければならない
+        super(...args);
+        // 子クラスのコンストラクタ処理
+        console.log("Childコンストラクタの処理", ...args);
+        // 親クラスで書き込まれた`name`は上書きされる
+        this.name = "Child";
+    }
+}
+const parent = new Parent("引数1", "引数2");
+console.log(parent.name); // => "Parent"
+const child = new Child("引数1", "引数2");
+console.log(child.name); // => "Child"
+
+// `Child`のインスタンスは`Parent`のプロトタイプメソッドを継承している
+const childInstance = new Child();
+childInstance.method(); // "Parent#method"
+// インスタンスメソッドも継承している
+childInstance.method2(); // "Parent#method2"
+// 静的メソッドも継承される
+console.log(Child.hello()); // => "Hello"
+console.log(childInstance);
+console.log(childInstance.constructor === Child); // => true
+
+
