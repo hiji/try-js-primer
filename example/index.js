@@ -897,4 +897,19 @@ console.log(Child.hello()); // => "Hello"
 console.log(childInstance);
 console.log(childInstance.constructor === Child); // => true
 
+// 例外処理
+try {
+    console.log("この文は実行されます");
+    // 未定義の関数を呼び出してReferenceError例外が発生する
+    undefinedFunction();
+    // この文は実行されません
+} catch (error) {
+    // 例外が発生したあとはこのブロックが実行される
+    console.log("この文は実行されます");
+    console.log(error instanceof ReferenceError); // => true
+    console.log(error.message); // => "undefinedFunction is not defined"
+} finally {
+    // このブロックはかならず実行される
+    console.log("この文は実行されます");
+}
 
