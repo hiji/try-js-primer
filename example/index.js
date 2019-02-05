@@ -642,3 +642,67 @@ console.log((new String(str)).toUpperCase());
 // プリミティブ型の値を取得する
 const stringWrapper = new String("文字列");
 console.log(stringWrapper.valueOf()); // => "文字列"
+
+// スコープチェーン
+{
+    // OUTERブロックスコープ
+    const x = "outer";
+    {
+        // INNERブロックスコープ
+        const x = "inner";
+        // 現在のスコープ(INNERブロックスコープ)にある`x`を参照する
+        console.log(x); // => "inner"
+    }
+    // 現在のスコープ(OUTERブロックスコープ)にある`x`を参照する
+    console.log(x); // => "outer"
+}
+
+// letとは違い、var宣言より前に参照してもエラーにならない
+// 変数宣言だけもっとも違いスコープの先頭に巻き上げられる
+console.log(x); // => undefined
+var x = "varのx";
+
+// `hello`関数の宣言より前に呼び出せる。関数宣言もvarと同じで巻き上げられる。
+console.log(hello()); // => "Hello"
+function hello(){
+    return "Hello";
+}
+
+// 即時実行関数
+(function() {
+    // 関数のスコープ内でfoo変数を宣言している
+    var foo = "foo";
+    console.log(foo); // => "foo"
+})();
+// foo変数のスコープ外
+console.log(typeof foo === "undefined"); // => true
+
+// letとconstが使えるようになった2015では、即時実行関数はブロックスコープで置き換えられる
+{
+    // ブロックスコープ内でfoo変数を宣言している
+    const foo = "foo";
+    console.log(foo); // => "foo"
+}
+// foo変数のスコープ外
+console.log(typeof foo === "undefined"); // => true
+
+// クロージャー
+const createCounter = () => {
+    let count = 0;
+    return function increment() {
+        // `increment`関数は外のスコープの変数`count`を参照している
+        // これがクロージャーと呼ばれる
+        count = count + 1;
+        return count;
+    };
+};
+// createCounter()の実行結果は、内側で定義されていた`increment`関数
+const myCounter = createCounter();
+// myCounter関数の実行結果は`count`の評価結果
+console.log(myCounter()); // => 1
+console.log(myCounter()); // => 2
+const newCountUp = createCounter();
+// 参照してる関数(オブジェクト)は別であるため===は一致しない
+console.log(myCounter === newCountUp);// false
+// それぞれの状態も別となる
+console.log(newCountUp()); // => 1
