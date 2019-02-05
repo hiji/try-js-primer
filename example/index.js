@@ -402,3 +402,87 @@ console.log("toString" in testObject); // => true
 const extObject = Object.create(Object.prototype);
 // `object`は`Object.prototype`を継承している
 console.log(extObject.hasOwnProperty === Object.prototype.hasOwnProperty); // => true
+
+// 配列
+const testArray = ["A", "B", "C"];
+console.log(testArray.length); // => 3
+testArray.length = 0; // lengthで要素を削除することもできる
+console.log(testArray.length); // => 0
+
+// undefined要素と未定義要素を判別
+const denseArray = [1, undefined, 3];
+const sparseArray = [1, , 3];
+// インデックスだと区別がつかない
+console.log(denseArray[1]); // => undefined
+console.log(sparseArray[1]); // => undefined
+// hasOwnPropertyで区別できる
+// 要素自体は`undefined`値が存在する
+console.log(denseArray.hasOwnProperty(1)); // => true
+// 要素自体がない
+console.log(sparseArray.hasOwnProperty(1)); // => false
+
+const indexArray = ["Java", "JavaScript", "Ruby"];
+const indexOfJS = indexArray.indexOf("JavaScript");
+console.log(indexOfJS); // => 1
+console.log(array[indexOfJS]); // => "JavaScript"
+// "JS" という要素はないため `-1` が返される
+console.log(array.indexOf("JS")); // => -1
+
+// colorプロパティを持つオブジェクトの配列
+const colors = [
+    { "color": "red" },
+    { "color": "green" },
+    { "color": "blue" }
+];
+// `color`プロパティが"blue"のオブジェクトのインデックスを取得
+const indexOfBlue = colors.findIndex((object) => {
+    return object.color === "blue";
+});
+console.log(indexOfBlue); // => 2
+console.log(colors[indexOfBlue]); // => { "color": "blue" }
+
+// `color`プロパティが"blue"のオブジェクトを取得
+const blueColor = colors.find((object) => {
+    return object.color === "blue";
+});
+console.log(blueColor); // => { "color": "blue" }
+// 該当する要素がない場合は`undefined`を返す
+console.log(colors.find((object) => object.color === "white")); // => undefined
+
+// 要素が含まれているかはincludesで判定できる（2015）
+// `includes`は含まれているなら`true`を返す
+const includesArray = ["Java", "JavaScript", "Ruby"];
+if (includesArray.includes("JavaScript")) {
+    console.log("配列にJavaScriptが含まれている");
+}
+
+const variableArray = ["A", "B", "C"];
+variableArray.push("D"); // "D"を末尾に追加
+console.log(variableArray); // => ["A", "B", "C", "D"]
+const popedItem = variableArray.pop(); // 最末尾の要素を削除し、その要素を返す
+console.log(popedItem); // => "D"
+console.log(variableArray); // => ["A", "B", "C"]
+array.unshift("S"); // "S"を先頭に追加
+console.log(array); // => ["S", "A", "B", "C"]
+const shiftedItem = array.shift(); // 先頭の要素を削除
+console.log(shiftedItem); // => "S"
+console.log(array); // => ["A", "B", "C"]
+
+// 配列の高階関数とメソッドチェーン
+// ECMAScriptのバージョン名と発行年
+const ECMAScriptVersions = [
+    { name: "ECMAScript 1", year: 1997 },
+    { name: "ECMAScript 2", year: 1998 },
+    { name: "ECMAScript 3", year: 1999 },
+    { name: "ECMAScript 5", year: 2009 },
+    { name: "ECMAScript 5.1", year: 2011 },
+    { name: "ECMAScript 2015", year: 2015 },
+    { name: "ECMAScript 2016", year: 2016 },
+    { name: "ECMAScript 2017", year: 2017 },
+];
+const versionNames = ECMAScriptVersions
+    // 2000年以下のデータに絞り込み
+    .filter(ECMAScript => ECMAScript.year <= 2000)
+    // それぞれの要素から`name`プロパティを取り出す
+    .map(ECMAScript => ECMAScript.name);
+console.log(versionNames); // => ["ECMAScript 1", "ECMAScript 2", "ECMAScript 3"]
