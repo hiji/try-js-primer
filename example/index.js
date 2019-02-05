@@ -631,3 +631,14 @@ const input2 = "A&B";
 // escapeURLタグ関数を使ったタグ付きテンプレート
 const escapedURL = escapeURL`https://example.com/search?q=${input2}&sort=desc`;
 console.log(escapedURL); // => "https://example.com/search?q=A%26B&sort=desc"
+
+// ラッパーオブジェクト
+const str = "string";
+// プリミティブ型の値に対してメソッド呼び出しを行うとき、次のような変換が行われる
+str.toUpperCase();
+// `str`へアクセスする際に、"string"がラッパーオブジェクトへ変換される
+// ラッパーオブジェクトはStringのインスタンスなのでメソッドを呼び出せる
+console.log((new String(str)).toUpperCase());
+// プリミティブ型の値を取得する
+const stringWrapper = new String("文字列");
+console.log(stringWrapper.valueOf()); // => "文字列"
