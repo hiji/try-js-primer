@@ -706,3 +706,65 @@ const newCountUp = createCounter();
 console.log(myCounter === newCountUp);// false
 // それぞれの状態も別となる
 console.log(newCountUp()); // => 1
+
+// thisでベースオブジェクトのプロパティを参照
+const person = {
+    fullName: "Brendan Eich",
+    sayName: function() {
+        // `person.fullName`と書いているのと同じ
+        return this.fullName;
+    }
+};
+// `person.fullName`を出力する
+console.log(person.sayName()); // => "Brendan Eich"
+
+// thisの問題。呼び出し方で変わってしまう。
+const say = person.sayName;
+// 代入したメソッドを関数として呼ぶ
+// この`say`関数はどのオブジェクトにも所属していない
+// `this`はundefinedとなるため例外を投げる
+console.log(say()); // => TypeError: Cannot read property 'fullName' of undefined
+
+// call, apply, bind
+function sayB(message) {
+    return `${message} ${this.fullName}！`;
+}
+const personB = {
+    fullName: "Brendan Eich"
+};
+// `this`を`person`にして`say`関数を呼びだす
+console.log(sayB.call(personB, "こんにちは")); // => "こんにちは Brendan Eich！"
+console.log(sayB.apply(personB, ["こんにちは"])); // => "こんにちは Brendan Eich！"
+// `this`を`person`に束縛した`say`関数をラップした関数を作る
+const sayPerson = sayB.bind(person, "こんにちは");
+console.log(sayPerson()); // => "こんにちは Brendan Eich！"
+
+// Arrow Functionでコールバック関数を定義すれば、常に外側のthisを使える
+const Prefixer = {
+    prefix: "pre",
+    prefixArray(strings) {
+        return strings.map((string) => {
+            // Arrow Function自体は`this`を持たない
+            // `this`は外側の`prefixArray`関数がもつ`this`を参照する
+            // そのため`this.prefix`は"pre"となる
+            return this.prefix + "-" + string;
+        });
+    }
+};
+// この時、`prefixArray`のベースオブジェクトは`Prefixer`となる
+// つまり、`prefixArray`メソッド内の`this`は`Prefixer`を参照する
+const prefixedStrings = Prefixer.prefixArray(["a", "b", "c"]);
+console.log(prefixedStrings); // => ["pre-a", "pre-b", "pre-c"]
+
+function outer() {
+    // Arrow Functionで定義した関数を返す
+    return () => {
+        // この関数の外側には`outer`関数が存在する
+        // `outer`関数に`this`を書いた場合と同じ
+        return this;
+    };
+}
+// `outer`関数の返り値はArrow Functionにて定義された関数
+const innerArrowFunction = outer();
+console.log(innerArrowFunction()); // => window or undefined
+
