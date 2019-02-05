@@ -486,3 +486,148 @@ const versionNames = ECMAScriptVersions
     // それぞれの要素から`name`プロパティを取り出す
     .map(ECMAScript => ECMAScript.name);
 console.log(versionNames); // => ["ECMAScript 1", "ECMAScript 2", "ECMAScript 3"]
+
+// 文字コード
+// 文字列"あ"の0番目のCode Pointを取得
+console.log("あ".codePointAt(0)); // => 12354
+// 符号位置12354の文字を取得する
+console.log(String.fromCodePoint(12354)); // => "あ"
+// "あ"のCode Pointは12354
+// 12354の16進数表現は3042
+console.log("\u{3042}"); // => "あ"
+// サロゲートペア
+// 上位サロゲート + 下位サロゲートの組み合わせ
+console.log("\uD867\uDE3D"); // => "𩸽"
+// Code Pointでの表現
+console.log("\u{29e3d}"); // => "𩸽"
+
+// 文字列の分割と結合
+const strings = "赤・青・緑".split("・");
+console.log(strings); // => ["赤", "青", "緑"]
+console.log(strings.join("、")); // => "赤、青、緑"
+// splitで空文字を指定して文字単位に分割するのは、Code Unit単位に分割されるので問題がある
+// "𩸽"はサロゲートペアであるため2つのCode Unit（\uD867\uDE3D）からなる
+// サロゲートペアを含む文字列を各Code Unitに分解
+const codeUnitElements = "𩸽のひらき".split("");
+// サロゲートペアを各CodeUnitに分解したため、文字化けしている
+console.log(codeUnitElements); // ["�", "�", "の", "ひ", "ら", "き"]
+// IteratorだとCode Point単位に扱ってくれるので分割できる
+const codePointString = "𩸽のひらき";
+// Array.fromメソッドで文字列を分解
+console.log(Array.from(codePointString)); // => ["𩸽", "の", "ひ", "ら", "き"]
+// ...（spread構文）で文字列を展開しものを配列にする
+console.log([...codePointString]); // => ["𩸽", "の", "ひ", "ら", "き"]
+// for...ofもIteratorを列挙するため、Code Pointごとで列挙できる
+for (const codePoint of codePointString) {
+    console.log(codePoint);
+}
+
+// lengthもCode Point単位に扱われる
+console.log("文字列".length); // => 3
+// 評価結果の文字列の要素数（Code Unit数）であるため1つ
+console.log("\u{3042}".length); // => 1
+// サロゲートペアを含むためCode Unitは6つ
+console.log("𩸽のひらき".length); // => 6
+
+// 部分文字列(slice)
+const baseString = "ABCDE";
+console.log(baseString.slice(1)); // => "BCDE"
+console.log(baseString.slice(1, 5)); // => "BCDE"
+// マイナスを指定すると後ろからの位置となる
+console.log(baseString.slice(-1)); // => "E"
+// 位置:1から4の範囲を取り出す
+console.log(baseString.slice(1, 4)); // => "BCD"
+// 第一引数 > 第二引数の場合、常に空文字を返す
+console.log(baseString.slice(4, 1)); // => ""
+// 実例
+const url = "https://example.com?param=1";
+const indexOfQuery = url.indexOf("?");
+const queryString = url.slice(indexOfQuery);
+console.log(queryString); // => "?param=1"
+
+// 部分文字列(substring)
+console.log(baseString.substring(1)); // => "BCDE"
+console.log(baseString.substring(1, 5)); // => "BCDE"
+// マイナスを指定すると0として扱われる
+console.log(baseString.substring(-1)); // => "ABCDE"
+// 位置:1から4の範囲を取り出す
+console.log(baseString.substring(1, 4)); // => "BCD"
+// 第一引数 > 第二引数の場合、引数が入れ替わる
+// string.substring(1, 4)と同じ結果になる
+console.log(baseString.substring(4, 1)); // => "BCD"
+
+// 正規表現での検索
+// 3つの連続するスペースにマッチする正規表現
+const pattern = /\s{3}/;
+// RegExp
+const spaceCount = 3;
+// `/\s{3}/`の正規表現を動的に生成する
+// "\"がエスケープ文字であるため、"\"自身を文字列として書くには、"\\"のように2つ書く
+const rpattern = new RegExp(`\\s{${spaceCount}}`);
+
+const searchString = "ABC あいう DE えお";
+// gフラグなしでは、最初の結果のみを持つ配列を返す
+const results = searchString.match(/[a-zA-Z]+/);
+console.log(results); // => ["ABC"]
+// aからZのどれかの文字が1つ以上連続するパターンにマッチするものを繰り返した（gフラグ）結果を返す
+const resultsWithG = searchString.match(/[a-zA-Z]+/g);
+console.log(resultsWithG[0]); // => "ABC"
+console.log(resultsWithG[1]); // => "DE"
+
+// "ECMAScript (数字+)"にマッチするが、欲しい文字列は数字の部分のみ
+const groupPattern = /ECMAScript (\d+)/i;
+// 返り値は0番目がマッチした全体、1番目がキャプチャの1番目というように対応している
+// [マッチした全部の文字列, キャプチャの1番目, キャプチャの2番目 ....]
+// `pattern.exec("ECMAScript 6")`も返り値は同じ
+const [all, capture1] = "ECMAScript 6".match(groupPattern);
+console.log(all); // => "ECMAScript 6"
+console.log(capture1); // => "6"
+
+// replaceでコールバック関数
+function toDateJa(dateString) {
+    // パターンにマッチしたときのみ、コールバック関数で置換処理が行われる
+    return dateString.replace(/(\d{4})-(\d{2})-(\d{2})/, (all, year, month, day) => {
+        // `all`には、マッチした文字列全体が入っているが今回は利用しない
+        // `all`が次の返す値で置換されるイメージ
+        return `${year}年${month}月${day}日`;
+    });
+}
+// マッチしない文字列の場合は、そのままの文字列が返る
+console.log(toDateJa("本日ハ晴天ナリ")); // => "本日ハ晴天ナリ"
+// マッチした場合は置換した結果を返す
+console.log(toDateJa("今日は2017-03-01です")); // => "今日は2017年03月01日です"
+
+// タグ付きテンプレート関数
+const input = "/";
+// URLエスケープして結合した場合
+const URL = `https://example.com/search?query=${encodeURIComponent(input)}&sort=desc`;
+// `/`が`%2F`へURLエスケープされている
+console.log(URL); // => "https://example.com/search?query=%2F&sort=desc"
+// タグ関数は引数の形が決まっていること以外は関数と同じ
+function tag(strings, ...values) {
+    // stringsには文字列部分が${}で区切られて順番に入る
+    console.log(strings); // => ["template "," literal ",""]
+    // valuesには${}の評価値が順番に入る
+    console.log(values); // => [0, 1]
+}
+tag`template ${0} literal ${1}`;
+
+// テンプレートを順番どおりに結合した文字列を返すタグ関数
+function stringRaw(strings, ...values) {
+    return strings.reduce((result, string, i) => {
+        return result + values[i - 1] + string;
+    });
+}
+// 関数`テンプレートリテラル` という形で呼び出す
+console.log(stringRaw`template ${0} literal ${1}`); // => "template 0 literal 1"
+
+// 変数をURLエスケープするタグ関数
+function escapeURL(strings, ...values) {
+    return strings.reduce((result, string, i) => {
+        return result + encodeURIComponent(values[i - 1]) + string;
+    });
+}
+const input2 = "A&B";
+// escapeURLタグ関数を使ったタグ付きテンプレート
+const escapedURL = escapeURL`https://example.com/search?q=${input2}&sort=desc`;
+console.log(escapedURL); // => "https://example.com/search?q=A%26B&sort=desc"
