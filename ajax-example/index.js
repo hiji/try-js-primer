@@ -1,29 +1,28 @@
 function main() {
     getUserInfo("hiji")
+        .then((userInfo) => createView(userInfo))
+        .then((view) => displayView(view))
         .catch((error) => {
             console.error(`エラーが発生しました (${error})`);
         });
 }
 
 function getUserInfo(userId) {
-    return new Promise(((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const request = new XMLHttpRequest();
         request.open("GET", `https://api.github.com/users/${userId}`);
         request.addEventListener("load", (event) => {
             if (event.target.status !== 200) {
                 reject(new Error(`${event.target.status}: ${event.target.statusText}`));
-                return;
             }
             const userInfo = JSON.parse(event.target.responseText);
-            const view = createView(userInfo);
-            displayView(view);
-            resolve();  // 成功
+            resolve(userInfo);
         });
         request.addEventListener("error", () => {
             reject(new Error("Network Error"));
         });
         request.send();
-    }));
+    });
 }
 
 function createView(userInfo) {
