@@ -1,10 +1,16 @@
 function main() {
-    getUserInfo("hiji")
+    const userId = getUserId();
+    getUserInfo(userId)
         .then((userInfo) => createView(userInfo))
         .then((view) => displayView(view))
         .catch((error) => {
             console.error(`エラーが発生しました (${error})`);
         });
+}
+
+function getUserId() {
+    const value = document.getElementById("userId").value;
+    return encodeURIComponent(value);
 }
 
 function getUserInfo(userId) {
