@@ -1,17 +1,33 @@
+function main() {
+    getUserInfo("hiji")
+        .catch((error) => {
+            console.error(`エラーが発生しました (${error})`);
+        });
+}
+
 function getUserInfo(userId) {
-    const request = new XMLHttpRequest();
-    request.open("GET", `https://api.github.com/users/${userId}`);
-    request.addEventListener("load", (event) => {
-        if (event.target.status !== 200) {
-            console.log(`${event.target.status}: ${event.target.statusText}`);
-            return;
-        }
-        console.log(event.target.status);
-        console.log(event.target.responseText);
+    return new Promise(((resolve, reject) => {
+        const request = new XMLHttpRequest();
+        request.open("GET", `https://api.github.com/users/${userId}`);
+        request.addEventListener("load", (event) => {
+            if (event.target.status !== 200) {
+                console.log(`${event.target.status}: ${event.target.statusText}`);
+                return;
+            }
+            const userInfo = JSON.parse(event.target.responseText);
+            const view = createView(userInfo);
+            displayView(view);
+            resolve();  // 成功
+        });
+        request.addEventListener("error", () => {
+            reject(new Error("Network Error"));
+        });
+        request.send();
+    }));
+}
 
-        const userInfo = JSON.parse(event.target.responseText);
-
-        const view = escapeHTML`
+function createView(userInfo) {
+    return escapeHTML`
         <h4>${userInfo.name} (@${userInfo.login})</h4>
         <img src="${userInfo.avatar_url}" alt="${userInfo.login}" height="100">
         <dl>
@@ -21,14 +37,11 @@ function getUserInfo(userId) {
             <dd>${userInfo.public_repos}</dd>
         </dl>
         `;
+}
 
-        const result = document.getElementById("result");
-        result.innerHTML = view;
-    });
-    request.addEventListener("error", () => {
-        console.error("Network Error");
-    });
-    request.send();
+function displayView(view) {
+    const result = document.getElementById("result");
+    result.innerHTML = view;
 }
 
 function escapeSpecialChars(str) {
